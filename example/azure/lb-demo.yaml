@@ -38,8 +38,27 @@ spec:
         stdin: true
         terminationMessagePath: /dev/termination-log
         terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /usr/share/nginx/html
+          name: demoapp-config
       restartPolicy: Always
       terminationGracePeriodSeconds: 30
+      volumes:
+        - name: demoapp-config
+          configMap:
+            name: demoapp-config
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: demoapp-config
+data:
+  index.html: |
+    <html>
+    <body>
+    <h1>Welcome at HCCS playground!</h1>
+    </body>
+    </html>
 ---
 apiVersion: extensions/v1beta1
 kind: Ingress
@@ -64,12 +83,12 @@ kind: Service
 metadata:
   name: lb-to-ingress
   annotations:
-    service.beta.kubernetes.io/azure-load-balancer-internal: "true"
+    service.beta.kubernetes.io/azure-load-balancer-internal: "false"
 spec:
   type: LoadBalancer
 #  loadBalancerIP: 10.240.0.25
   ports:
   - port: 80
   selector:
-    app: testapp-ingress
+    app: testapp-service
 
